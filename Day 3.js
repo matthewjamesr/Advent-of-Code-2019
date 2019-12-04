@@ -82,7 +82,7 @@ function detectCross(line1, line2) {
     curX = line1[i][0];
     curY = line1[i][1];
     
-    for (j = 0; j < line2.length; i++) {
+    for (j = 0; j < line2.length; j++) {
       if (curX == line2[j][0] && curY == line2[j][1]) {
         crossings.push({id: crossCount, x: curX, y: curY});
         crossCount++;
