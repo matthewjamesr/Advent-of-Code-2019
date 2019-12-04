@@ -8,7 +8,7 @@ var paths = {'l1Path': [], 'l2Path': []};
 var guidance1 = [];
 var guidance2 = [];
 
-var crossings = {'count': 0, 'closestCross': 0, 'data': []};
+var crossings = {'count': 0, 'closestCross': 0, 'fewestSteps': 0, 'data': []};
 
 function splitIndex(value, index) {
 	return value.substring(0, index) + "," +value.substring(index);
@@ -23,54 +23,59 @@ function drawLines(line1, line2) {
     guidance2.push(splitIndex(l2[i],1));
   }
   // Create Path Objects{}
+	var steps = 0;
   for (i = 0; i < line1.length; i++) {
     dir = guidance1[i].toString().split(",")[0];
     step = parseInt(guidance1[i].toString().split(",")[1]);
 
     for (j = 0; j < step; j++) {
+			steps = steps + 1;
       switch (dir) {
         case "R":
           position[0] = parseInt(position[0]) + 1;
-          paths.l1Path.push({x: position[0], y: position[1]});
+          paths.l1Path.push({x: position[0], y: position[1], totalSteps: steps});
           break;
         case "L":
           position[0] = parseInt(position[0]) - 1;
-          paths.l1Path.push({x: position[0], y: position[1]});
+          paths.l1Path.push({x: position[0], y: position[1], totalSteps: steps});
           break;
         case "U":
           position[1] = parseInt(position[1]) + 1;
-          paths.l1Path.push({x: position[0], y: position[1]});
+          paths.l1Path.push({x: position[0], y: position[1], totalSteps: steps});
           break;
         case "D":
           position[1] = parseInt(position[1]) - 1;
-          paths.l1Path.push({x: position[0], y: position[1]});
+          paths.l1Path.push({x: position[0], y: position[1], totalSteps: steps});
           break;
       }
     }
 
     if (i == line1.length-1) { position = [0,0]; }
   }
+
+	var steps = 0;
   for (i = 0; i < line2.length; i++) {
     dir = guidance2[i].toString().split(",")[0];
     step = parseInt(guidance2[i].toString().split(",")[1]);
 
     for (j = 0; j < step; j++) {
+			steps = steps + 1;
       switch (dir) {
         case "R":
           position[0] = parseInt(position[0]) + 1;
-          paths.l2Path.push({x: position[0], y: position[1]});
+          paths.l2Path.push({x: position[0], y: position[1], totalSteps: steps});
           break;
         case "L":
           position[0] = parseInt(position[0]) - 1;
-          paths.l2Path.push({x: position[0], y: position[1]});
+          paths.l2Path.push({x: position[0], y: position[1], totalSteps: steps});
           break;
         case "U":
           position[1] = parseInt(position[1]) + 1;
-          paths.l2Path.push({x: position[0], y: position[1]});
+          paths.l2Path.push({x: position[0], y: position[1], totalSteps: steps});
           break;
         case "D":
           position[1] = parseInt(position[1]) - 1;
-          paths.l2Path.push({x: position[0], y: position[1]});
+          paths.l2Path.push({x: position[0], y: position[1], totalSteps: steps});
           break;
       }
     }
@@ -81,7 +86,8 @@ function detectCross(line1, line2) {
   var crossCount = 1;
   var l1 = line1;
   var l2 = line2;
-	var closestCross = 10000;
+	var closestCross = 1000000;
+	var fewestSteps = 1000000;
   for (i = 0; i < line1.length; i++) {
     for (j = 0; j < line2.length; j++) {
       l1x = l1[i].x;
@@ -93,7 +99,12 @@ function detectCross(line1, line2) {
 					closestCross = Math.abs(l1x) + Math.abs(l1y);
 					crossings.closestCross = closestCross;
 				}
-        crossings.data.push({id: crossCount, distance: Math.abs(l1x) + Math.abs(l1y), x: l1x, y: l1y});
+				if (l1[i].totalSteps + l2[j].totalSteps < fewestSteps) {
+					fewestSteps = l1[i].totalSteps + l2[j].totalSteps;
+					crossings.fewestSteps = fewestSteps;
+				}
+        crossings.data.push({id: crossCount, distance: Math.abs(l1x) + Math.abs(l1y),
+					steps: l1[i].totalSteps + l2[j].totalSteps, x: l1x, y: l1y});
 				crossings.count = crossCount;
         crossCount++;
       }
